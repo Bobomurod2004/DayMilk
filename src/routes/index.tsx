@@ -11,7 +11,12 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
-import { PRODUCTS, CATEGORIES, sortByCategory } from "@/lib/products";
+import {
+  PRODUCTS,
+  formatProductName,
+  formatProductSize,
+  getProductAnchor,
+} from "@/lib/products";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -49,6 +54,10 @@ const BLOG = [
 
 // Hero slideshow: one representative new product image per category, auto-rotating.
 const HERO_SLIDES = ["Sut 3,2%", "Kefir 2,5%", "Qatiq 2,0%", "Ayron 2,5%", "Qaymoq 45%", "Smetana 20%", "Tvorog"]
+  .map((name) => PRODUCTS.find((p) => p.name === name))
+  .filter((p): p is (typeof PRODUCTS)[number] => Boolean(p));
+
+const CATALOG_FEATURED = ["Sut 3,2%", "Kefir 2,5%", "Qatiq 2,0%", "Ayron 2,5%", "Qaymoq 45%"]
   .map((name) => PRODUCTS.find((p) => p.name === name))
   .filter((p): p is (typeof PRODUCTS)[number] => Boolean(p));
 
@@ -227,52 +236,29 @@ function Features() {
 
 function Catalog() {
   const { t } = useLang();
-  const [active, setActive] = useState("all");
-
-  const filtered = sortByCategory(
-    active === "all" ? PRODUCTS : PRODUCTS.filter((p) => p.cat === active),
-  );
-  // Duplicate the list so the marquee track can loop seamlessly (animation runs to -50%).
-  const track = [...filtered, ...filtered];
+  const track = [...CATALOG_FEATURED, ...CATALOG_FEATURED];
 
   return (
     <section className="mx-4 mt-16">
       <div className="mx-auto max-w-7xl">
-        <h2 className="text-3xl lg:text-4xl font-extrabold text-primary-deep">
-          {t("catalog.title")}
+        <h2 className="text-center text-3xl font-extrabold text-primary-deep lg:text-4xl">
+          {t("nav.products")}
         </h2>
-        <div className="mt-6 flex items-center justify-between gap-4 flex-wrap border-b border-border pb-3">
-          <div className="flex items-center gap-2 flex-wrap">
-            {CATEGORIES.map((c) => (
-              <button
-                key={c.id}
-                onClick={() => setActive(c.id)}
-                className={`px-4 py-2 rounded-xl text-sm font-medium transition cursor-pointer ${active === c.id
-                  ? "bg-primary text-primary-foreground shadow-md"
-                  : "text-muted-foreground hover:bg-muted"
-                  }`}
-              >
-                {t(c.key)}
-              </button>
-            ))}
-          </div>
-          <Link
-            to="/mahsulotlar"
-            className="text-primary font-semibold text-sm inline-flex items-center gap-1 hover:gap-2 transition-all"
-          >
-            {t("catalog.all")} <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
 
-        {/* Auto-scrolling marquee: products glide right-to-left and loop forever; pauses on hover. */}
         <div className="group relative mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_4%,#000_96%,transparent)]">
-          <div className="flex w-max gap-4 animate-marquee py-1">
+          <div
+            className="flex w-max gap-4 animate-marquee py-1"
+            style={{ animationDuration: "28s" }}
+          >
             {track.map((p, i) => (
-              <div key={`${p.name}-${p.size}-${i}`} className="w-[280px] sm:w-[320px] shrink-0">
-                <div className="group/card h-full rounded-[24px] overflow-hidden bg-[#f3f4f6] flex flex-col justify-between hover:shadow-[var(--shadow-card)] hover:-translate-y-1 transition mx-2">
-                  <div className="h-[420px] flex items-end justify-center pt-[30px] px-[20px] pb-[10px]">
-                    {/* Wrapper carries the per-product base offset so all product bases
-                        land on one bottom line; the img keeps its own hover/scale transforms. */}
+              <div key={`${p.name}-${p.size}-${i}`} className="w-[280px] shrink-0 sm:w-[320px]">
+                <Link
+                  to="/mahsulotlar"
+                  hash={() => getProductAnchor(p)}
+                  aria-label={`${formatProductName(p.name)} ${formatProductSize(p.size)}`}
+                  className="group/card mx-2 block overflow-hidden rounded-[24px] bg-[#f3f4f6] transition hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
+                >
+                  <div className="flex h-[420px] items-end justify-center px-[20px] pb-[16px] pt-[30px]">
                     <div
                       className="flex items-end"
                       style={p.imgYOffset ? { transform: `translateY(${p.imgYOffset}px)` } : undefined}
@@ -282,19 +268,25 @@ function Catalog() {
                         alt={p.name}
                         loading="lazy"
                         style={{ height: p.imgH ? `${p.imgH}px` : undefined }}
-                        className={`w-auto max-w-full object-contain object-bottom block group-hover/card:scale-[1.03] transition-transform origin-bottom duration-300 ${p.imgClass || ""}`}
+                        className={`block w-auto max-w-full origin-bottom object-contain object-bottom transition-transform duration-300 group-hover/card:scale-[1.03] ${p.imgClass || ""}`}
                       />
                     </div>
                   </div>
-                  <div className="mx-[12px] mb-[12px] bg-[#27a8df] rounded-[22px] px-[24px] py-[20px] text-white flex flex-col justify-center">
-                    <h3 className="font-display font-bold text-xl leading-tight truncate">{p.name}</h3>
-                    <p className="text-sm text-white/90 mt-1">{p.size}</p>
-                  </div>
-                </div>
+                  <span className="sr-only">
+                    {formatProductName(p.name)} {formatProductSize(p.size)}
+                  </span>
+                </Link>
               </div>
             ))}
           </div>
         </div>
+
+        <Link
+          to="/mahsulotlar"
+          className="mx-auto mt-6 inline-flex w-full items-center justify-center gap-1 text-sm font-semibold text-primary transition-all hover:gap-2"
+        >
+          {t("catalog.all")} <ArrowRight className="w-4 h-4" />
+        </Link>
       </div>
     </section>
   );

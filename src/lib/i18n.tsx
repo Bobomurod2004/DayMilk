@@ -29,7 +29,7 @@ export const translations: Record<Lang, Dict> = {
     "feat.4.t": "Sifat nazorati",
     "feat.4.d": "Har bosqichda qat'iy sifat nazorati va xavfsizlik.",
 
-    "catalog.title": "Mahsulotlar katalogi",
+    "catalog.title": "Mahsulotlarimiz",
     "catalog.subtitle": "Har kuni yangi va tabiiy sut mahsulotlari to'liq tanlovi.",
     "catalog.all": "Barcha mahsulotlar",
     "cat.all": "Hammasi",

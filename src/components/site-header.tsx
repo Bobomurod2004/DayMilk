@@ -1,4 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useEffect, useRef, useState } from "react";
 import { Menu } from "lucide-react";
 import { useLang, type Lang } from "@/lib/i18n";
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from "@/components/ui/sheet";
@@ -16,38 +17,75 @@ export const NAV = [
 export function Logo({ light = false }: { light?: boolean }) {
   return (
     <Link to="/" className="group flex items-center">
-      <img 
-        src={logoImg} 
-        alt="Day Milk Logo" 
-        className="h-16 md:h-20 w-auto object-contain drop-shadow-md transition-transform duration-300 group-hover:scale-[1.02]" 
+      <img
+        src={logoImg}
+        alt="Day Milk Logo"
+        className="h-12 w-auto object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-[1.02] md:h-14"
       />
     </Link>
   );
 }
 
-export function SiteHeader() {
+export function SiteHeader({ hideOnScroll = false }: { hideOnScroll?: boolean }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { lang, setLang, t } = useLang();
+  const [isHidden, setIsHidden] = useState(false);
+  const lastScrollY = useRef(0);
   const langs: { code: Lang; label: string }[] = [
     { code: "uz", label: "UZB" },
     { code: "ru", label: "РУС" },
     { code: "en", label: "ENG" },
   ];
+
+  useEffect(() => {
+    if (!hideOnScroll) {
+      setIsHidden(false);
+      return;
+    }
+
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const delta = currentScrollY - lastScrollY.current;
+
+      if (currentScrollY <= 24) {
+        setIsHidden(false);
+      } else if (delta > 8) {
+        setIsHidden(true);
+      } else if (delta < -8) {
+        setIsHidden(false);
+      }
+
+      lastScrollY.current = currentScrollY;
+    };
+
+    lastScrollY.current = window.scrollY;
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [hideOnScroll]);
+
   return (
-    <header className="sticky top-4 z-50 mx-4">
-      <div className="mx-auto max-w-7xl rounded-2xl bg-primary text-primary-foreground shadow-[var(--shadow-brand)]">
-        <div className="flex items-center justify-between px-5 py-3">
+    <header
+      className={`sticky top-4 z-50 mx-4 transition-transform duration-300 ${
+        hideOnScroll && isHidden ? "pointer-events-none" : ""
+      }`}
+      style={{
+        transform: hideOnScroll && isHidden ? "translateY(calc(-100% - 1rem))" : "translateY(0)",
+      }}
+    >
+      <div className="mx-auto max-w-7xl rounded-xl bg-[oklch(0.58_0.14_252)] text-primary-foreground shadow-[0_14px_30px_-18px_oklch(0.58_0.14_252_/_0.5)]">
+        <div className="flex items-center justify-between px-4 py-1 md:px-5">
           <Logo light />
-          <nav className="hidden lg:flex items-center gap-1 text-sm">
+          <nav className="hidden items-center gap-1 text-[13px] lg:flex">
             {NAV.map((item) => {
               const active = pathname === item.to;
               return (
                 <Link
                   key={item.to}
                   to={item.to}
-                  className={`px-3 py-2 rounded-lg transition-colors hover:bg-white/10 ${
+                  className={`rounded-md px-2.5 py-1.5 transition-colors hover:bg-white/12 ${
                     active
-                      ? "text-accent-yellow font-semibold relative after:content-[''] after:absolute after:bottom-1 after:left-3 after:right-3 after:h-0.5 after:bg-accent-yellow after:rounded-full"
+                      ? "relative font-semibold text-accent-yellow after:absolute after:bottom-0.5 after:left-2.5 after:right-2.5 after:h-0.5 after:rounded-full after:bg-accent-yellow after:content-['']"
                       : ""
                   }`}
                 >
@@ -56,10 +94,10 @@ export function SiteHeader() {
               );
             })}
           </nav>
-          <div className="flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-2 text-xs font-medium">
+          <div className="flex items-center gap-2.5">
+            <div className="hidden items-center gap-1.5 text-[11px] font-medium md:flex">
               {langs.map((l, i) => (
-                <span key={l.code} className="flex items-center gap-2">
+                <span key={l.code} className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => setLang(l.code)}
@@ -72,16 +110,16 @@ export function SiteHeader() {
               ))}
             </div>
             {/* Mobile menu trigger */}
-            <div className="lg:hidden flex items-center">
+            <div className="flex items-center lg:hidden">
               <Sheet>
                 <SheetTrigger asChild>
-                  <button className="p-2 rounded-lg hover:bg-white/10 transition cursor-pointer">
-                    <Menu className="w-6 h-6 text-white" />
+                  <button className="cursor-pointer rounded-md p-1.5 transition hover:bg-white/12">
+                    <Menu className="h-5 w-5 text-white" />
                   </button>
                 </SheetTrigger>
                 <SheetContent
                   side="right"
-                  className="bg-primary text-primary-foreground border-l-white/10 flex flex-col p-6 w-[280px]"
+                  className="flex w-[272px] flex-col border-l-white/10 bg-[oklch(0.58_0.14_252)] p-6 text-primary-foreground"
                 >
                   <div className="mt-8 flex flex-col gap-2 text-base">
                     {NAV.map((item) => {
@@ -112,7 +150,7 @@ export function SiteHeader() {
                           key={l.code}
                           type="button"
                           onClick={() => setLang(l.code)}
-                          className={`px-3 py-1.5 rounded-lg text-xs transition cursor-pointer ${
+                          className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs transition ${
                             lang === l.code
                               ? "bg-accent-yellow text-accent-yellow-foreground font-semibold"
                               : "text-white/60 border border-white/20 hover:bg-white/5"

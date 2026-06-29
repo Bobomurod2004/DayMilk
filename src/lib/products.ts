@@ -19,7 +19,6 @@ import qaymoq380 from "@/assets/products/qaymoq-380.png";
 import qaymoq500 from "@/assets/products/qaymoq-500.png";
 import tvorog200 from "@/assets/products/tvorog-200.jpg";
 import tvorojok400 from "@/assets/products/tvorojok-banan-400.jpg";
-import durda500 from "@/assets/products/durda-500.jpg";
 import smetana340 from "@/assets/products/smetana-20-340.png";
 import smetana200 from "@/assets/products/smetana-20-200.jpg";
 import smetana20_500 from "@/assets/products/smetana-20-500.png";
@@ -363,31 +362,31 @@ export const PRODUCTS = [
     size: "400 g",
     qty: 400,
     img: tvorojok400,
-    imgYOffset: 11,
+    imgYOffset: 10,
     cat: "tvorog",
     desc: "d.tvorog",
-    imgH: 270,
-    cardImgH: 260,
-    cardImgMaxW: "112%",
-    cardYOffset: -55,
+    imgH: 230,
+    cardImgH: 220,
+    cardImgMaxW: "104%",
+    cardYOffset: -56,
   },
   {
     name: "Qulupnayli tvorojok 5%",
     size: "400 g",
     qty: 401,
     img: tvorojokStrawberry400,
-    imgYOffset: 11,
+    imgYOffset: 10,
     cat: "tvorog",
     desc: "d.tvorog",
-    imgH: 270,
-    cardImgH: 260,
-    cardImgMaxW: "112%",
-    cardYOffset: -55,
+    imgH: 230,
+    cardImgH: 220,
+    cardImgMaxW: "104%",
+    cardYOffset: -56,
   },
   {
     name: "Suzma",
     size: "200 g",
-    qty: 499, // sort just before Durda within the Tvorog group
+    qty: 499,
     img: suzma200,
     cat: "tvorog",
     desc: "d.suzma",
@@ -395,20 +394,6 @@ export const PRODUCTS = [
     cardImgH: 240,
     cardImgMaxW: "112%",
     cardYOffset: -55,
-  },
-  {
-    name: "Durda 45%",
-    size: "500 g",
-    qty: 500,
-    img: durda500,
-    imgYOffset: 10,
-    cat: "tvorog",
-    desc: "d.durda",
-    imgH: 285,
-    cardImgH: 260,
-    cardImgMaxW: "116%",
-    cardScale: 1.24,
-    cardYOffset: 11,
   },
 ];
 
@@ -431,6 +416,34 @@ export type Product = {
   // lands on one bottom line (compensates for differing bottom whitespace in photos).
   imgYOffset?: number;
 };
+
+export function getProductAnchor(product: Pick<Product, "name" | "size">) {
+  const normalize = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/['`’]/g, "")
+      .replace(/[%.,]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-]/g, "")
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "");
+
+  return `${normalize(product.name)}-${normalize(product.size)}`;
+}
+
+export function formatProductName(name: string) {
+  return name.replace(/(\d+),0%/g, "$1%");
+}
+
+export function formatProductSize(size: string) {
+  const match = size.match(/^(\d+)\s*([a-zA-Z]+)$/);
+
+  if (!match) {
+    return size;
+  }
+
+  return `${match[1]} ${match[2].toLowerCase()}`;
+}
 
 // Products ordered by category sequence, product family, then by size.
 const catOrder = CATEGORIES.filter((c) => c.id !== "all").map((c) => c.id);
