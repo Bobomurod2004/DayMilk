@@ -1,22 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState, useRef, useEffect } from "react";
-import { Leaf, Factory, Truck, ShieldCheck, ArrowRight, Handshake } from "lucide-react";
+import { useRef } from "react";
+import { Leaf, Factory, Truck, ShieldCheck, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import blogDessert from "@/assets/blog-dessert.jpg";
 import blogBreakfast from "@/assets/blog-breakfast.jpg";
 import blogTips from "@/assets/blog-tips.jpg";
+import heroBackground from "@/assets/reference/hero-background-generated.png";
+import heroProductsCutout from "@/assets/reference/hero-products-cutout.png";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { Link } from "@tanstack/react-router";
 import { useLang } from "@/lib/i18n";
-import {
-  PRODUCTS,
-  formatProductName,
-  formatProductSize,
-  getProductAnchor,
-} from "@/lib/products";
+import { PRODUCTS, formatProductName, formatProductSize, getProductAnchor } from "@/lib/products";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -52,123 +49,167 @@ const BLOG = [
   { img: blogTips, t: "blog.3.t", d: "blog.3.d" },
 ];
 
-// Hero slideshow: one representative new product image per category, auto-rotating.
-const HERO_SLIDES = ["Sut 3,2%", "Kefir 2,5%", "Qatiq 2,0%", "Ayron 2,5%", "Qaymoq 45%", "Smetana 20%", "Tvorog"]
-  .map((name) => PRODUCTS.find((p) => p.name === name))
-  .filter((p): p is (typeof PRODUCTS)[number] => Boolean(p));
-
-const CATALOG_FEATURED = ["Sut 3,2%", "Kefir 2,5%", "Qatiq 2,0%", "Ayron 2,5%", "Qaymoq 45%"]
-  .map((name) => PRODUCTS.find((p) => p.name === name))
+const CATALOG_FEATURED = [
+  { name: "Qatiq 2,0%", size: "900 g" },
+  { name: "Kefir 2,5%", size: "900 g" },
+  { name: "Ayron 2,5%", size: "1 litr" },
+  { name: "Qaymoq 45%", size: "500 g" },
+  { name: "Smetana 20%", size: "500 g" },
+  { name: "Tvorog", size: "200 g" },
+  { name: "Bananli tvorojok 5%", size: "400 g" },
+]
+  .map((item) => PRODUCTS.find((p) => p.name === item.name && p.size === item.size))
   .filter((p): p is (typeof PRODUCTS)[number] => Boolean(p));
 
 function Hero() {
   const { t } = useLang();
   const container = useRef<HTMLDivElement>(null);
-  const [slide, setSlide] = useState(0);
 
-  // Auto-rotate the hero product images.
-  useEffect(() => {
-    const id = setInterval(() => setSlide((s) => (s + 1) % HERO_SLIDES.length), 2800);
-    return () => clearInterval(id);
-  }, []);
+  useGSAP(
+    () => {
+      const timeline = gsap.timeline({
+        defaults: {
+          ease: "power3.out",
+        },
+      });
 
-  useGSAP(() => {
-    const tl = gsap.timeline();
-    tl.from(".hero-text", { y: 30, opacity: 0, duration: 0.8, stagger: 0.15, ease: "power3.out" })
-      .from(".hero-image", { scale: 0.9, opacity: 0, duration: 1, ease: "back.out(1.5)" }, "-=0.4")
-      .from(".milk-drop", { y: -100, opacity: 0, duration: 2, stagger: 0.3, ease: "bounce.out" }, "-=1");
-
-    gsap.to(".hero-image", {
-      y: -15,
-      duration: 3,
-      repeat: -1,
-      yoyo: true,
-      ease: "sine.inOut",
-    });
-    
-    gsap.to(".milk-drop", {
-      y: "120vh",
-      duration: 10,
-      stagger: 2,
-      repeat: -1,
-      ease: "none",
-    });
-  }, { scope: container });
+      timeline
+        .from(".hero-nav", {
+          opacity: 0,
+          y: -24,
+          duration: 0.72,
+        })
+        .from(
+          ".hero-copy > *",
+          {
+            opacity: 0,
+            y: 26,
+            duration: 0.82,
+            stagger: 0.12,
+          },
+          "-=0.36",
+        )
+        .from(
+          ".hero-product",
+          {
+            opacity: 0,
+            x: 42,
+            y: 18,
+            scale: 0.95,
+            duration: 0.95,
+          },
+          "-=0.58",
+        )
+        .from(
+          ".hero-glow",
+          {
+            opacity: 0,
+            scale: 0.82,
+            duration: 1,
+          },
+          "-=0.86",
+        );
+    },
+    { scope: container },
+  );
 
   return (
-    <section className="relative mt-6 mx-4" ref={container}>
-      <div className="mx-auto max-w-7xl rounded-3xl overflow-hidden relative border border-border bg-white shadow-[var(--shadow-card)]">
-        {/* Sut tomchilari (Milk drops effect) */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
-          {[...Array(6)].map((_, i) => (
-            <svg key={i} className="milk-drop absolute w-8 h-12 text-primary/10" style={{ left: `${10 + i * 15}%`, top: `-10%` }} viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C12 2 5 10 5 15C5 18.866 8.13401 22 12 22C15.866 22 19 18.866 19 15C19 10 12 2 12 2Z" />
-            </svg>
-          ))}
-        </div>
+    <section
+      className="hero-shell relative w-[1280px] h-[720px] mx-auto overflow-hidden bg-[#f7efe3]"
+      ref={container}
+      style={{ position: 'relative' }}
+    >
+      {/* 1. Background */}
+      <img 
+        src={heroBackground} 
+        alt="" 
+        className="absolute left-0 top-0 w-[1280px] h-[720px] object-cover pointer-events-none z-0" 
+      />
 
-        <div className="grid lg:grid-cols-2 gap-8 items-center px-8 lg:px-14 py-14 lg:py-20 relative z-10">
-          <div>
-            <h1 className="hero-text text-5xl lg:text-6xl font-extrabold text-primary-deep leading-[1.05]">
-              {t("hero.title.1")}
-              <br />
-              {t("hero.title.2")}
-            </h1>
-            <p className="hero-text mt-6 text-muted-foreground text-lg max-w-md">{t("hero.desc")}</p>
-            <div className="hero-text mt-6 flex items-center gap-3 border-l-4 border-accent-yellow pl-4">
-              <span className="text-primary font-semibold">{t("brand.tagline")}</span>
-            </div>
-
-            <div className="hero-text mt-8 flex flex-wrap gap-3">
-              <Link
-                to="/mahsulotlar"
-                className="bg-primary text-primary-foreground font-semibold px-6 py-3.5 rounded-xl shadow-[var(--shadow-brand)] hover:brightness-110 transition inline-flex items-center gap-2"
-              >
-                {t("hero.cta.products")} <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link
-                to="/kompaniya"
-                className="bg-accent-yellow text-accent-yellow-foreground font-semibold px-6 py-3.5 rounded-xl hover:brightness-105 transition inline-flex items-center gap-2"
-              >
-                {t("hero.cta.about")} <Handshake className="w-4 h-4" />
-              </Link>
-            </div>
-          </div>
-
-          <div className="relative flex justify-center items-center py-10">
-            {/* Animated Glow backdrops (Blobs) */}
-            <div className="absolute top-0 -left-4 w-64 md:w-80 h-64 md:h-80 bg-primary/30 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob -z-10"></div>
-            <div className="absolute top-0 -right-4 w-64 md:w-80 h-64 md:h-80 bg-accent-yellow/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000 -z-10"></div>
-            
-            {/* Main floating image — auto-rotating product slideshow */}
-            <div className="relative z-10 hero-image w-full max-w-md h-[420px]">
-              {HERO_SLIDES.map((p, i) => (
-                <img
-                  key={p.name}
-                  src={p.img}
-                  alt={p.name}
-                  width={400}
-                  height={400}
-                  loading={i === 0 ? "eager" : "lazy"}
-                  className={`absolute inset-0 m-auto w-full h-full object-contain max-h-[420px] drop-shadow-[0_20px_50px_rgba(0,0,0,0.2)] mix-blend-multiply transition-opacity duration-700 ease-in-out ${i === slide ? "opacity-100" : "opacity-0"} ${p.imgClass || ""}`}
-                />
-              ))}
-            </div>
-
-            {/* Slide indicators */}
-            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
-              {HERO_SLIDES.map((p, i) => (
-                <button
-                  key={p.name}
-                  onClick={() => setSlide(i)}
-                  aria-label={p.name}
-                  className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${i === slide ? "w-6 bg-primary" : "w-2 bg-primary/30 hover:bg-primary/50"}`}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
+      {/* Header absolutely positioned on top */}
+      <div className="absolute left-0 top-0 w-[1280px] h-[80px] z-50">
+        <SiteHeader variant="overlay" />
       </div>
+
+      {/* Heading Text */}
+      <h1 
+        className="absolute z-30 font-[700] text-[#0B3E9C]"
+        style={{ left: "60px", top: "200px", fontFamily: "'Playfair Display', serif", fontSize: "72px", lineHeight: "1.1", margin: 0 }}
+      >
+        Daymilk – tabiiy,<br />
+        sifatli va mazali<br />
+        sut mahsulotlari
+      </h1>
+
+      {/* CTA Button */}
+      <Link
+        to="/mahsulotlar"
+        className="absolute z-30 flex items-center justify-center gap-3 rounded-[999px] bg-gradient-to-b from-[#ffd154] to-[#FDBA21] px-8 py-4 text-[18px] font-semibold text-[#0B3E9C] shadow-[0_4px_14px_rgba(253,186,33,0.3)] transition-transform duration-300 hover:scale-[1.03]"
+        style={{ left: "60px", top: "480px", width: "280px", height: "60px" }}
+      >
+        Mahsulotlarni ko'rish
+        <ArrowRight className="h-5 w-5" />
+      </Link>
+
+      {/* CSS Podiums have been removed. Products will now rest directly on the scene. */}
+
+      {/* Products Array Elements Layered Exactly as Requested */}
+
+      {/* 6. Qatiq */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Qatiq 2,0%" && p.size === "900 g")?.img}
+        alt="Qatiq"
+        className="absolute z-[35] transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto drop-shadow-xl"
+        style={{ left: "650px", top: "330px", height: "185px", width: "auto" }}
+      />
+
+      {/* 7. Kefir */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Kefir 1%" && p.size === "1 litr")?.img}
+        alt="Kefir"
+        className="absolute z-30 transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto"
+        style={{ left: "735px", top: "105px", height: "410px", width: "auto" }}
+      />
+
+      {/* 8. Ayron */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Ayron 2,5%" && p.size === "1 litr")?.img}
+        alt="Ayron"
+        className="absolute z-30 transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto"
+        style={{ left: "835px", top: "105px", height: "410px", width: "auto" }}
+      />
+
+      {/* 9. Go'ja */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Go'ja" && p.size === "1 litr")?.img}
+        alt="Go'ja"
+        className="absolute z-30 transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto"
+        style={{ left: "935px", top: "105px", height: "410px", width: "auto" }}
+      />
+
+      {/* 10. Qaymoq */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Qaymoq 45%" && p.size === "500 g")?.img}
+        alt="Qaymoq"
+        className="absolute z-[40] transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto drop-shadow-xl mix-blend-multiply"
+        style={{ left: "760px", top: "420px", height: "95px", width: "auto" }}
+      />
+
+      {/* 11. Smetana */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Smetana 20%" && p.size === "500 g")?.img}
+        alt="Smetana"
+        className="absolute z-[40] transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto drop-shadow-xl"
+        style={{ left: "860px", top: "425px", height: "90px", width: "auto" }}
+      />
+
+      {/* 12. Tvorog */}
+      <img
+        src={PRODUCTS.find(p => p.name === "Tvorog")?.img}
+        alt="Tvorog"
+        className="absolute z-[35] transition-transform duration-300 hover:-translate-y-[5px] pointer-events-auto drop-shadow-xl"
+        style={{ left: "965px", top: "360px", height: "230px", width: "auto" }}
+      />
     </section>
   );
 }
@@ -177,42 +218,47 @@ function Features() {
   const { t } = useLang();
   const container = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    const cards = gsap.utils.toArray(".feat-card");
-    gsap.from(cards, {
-      y: 60,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.2,
-      ease: "power2.out",
-      scrollTrigger: {
-        trigger: container.current,
-        start: "top 85%",
-      }
-    });
+  useGSAP(
+    () => {
+      const cards = gsap.utils.toArray(".feat-card");
+      gsap.from(cards, {
+        y: 60,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.2,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top 85%",
+        },
+      });
 
-    gsap.to(".flow-line", {
-      scaleX: 1,
-      duration: 1.5,
-      ease: "none",
-      scrollTrigger: {
-        trigger: container.current,
-        start: "top 75%",
-        end: "bottom 60%",
-        scrub: 1,
-      }
-    });
-  }, { scope: container });
+      gsap.to(".flow-line", {
+        scaleX: 1,
+        duration: 1.5,
+        ease: "none",
+        scrollTrigger: {
+          trigger: container.current,
+          start: "top 75%",
+          end: "bottom 60%",
+          scrub: 1,
+        },
+      });
+    },
+    { scope: container },
+  );
 
   return (
     <section className="mx-4 mt-20 relative" ref={container}>
-      <h2 className="text-3xl lg:text-4xl font-extrabold text-center text-primary-deep mb-12">Fermadan Dasturxongacha</h2>
+      <h2 className="text-3xl lg:text-4xl font-extrabold text-center text-primary-deep mb-12">
+        Fermadan Dasturxongacha
+      </h2>
       <div className="mx-auto max-w-7xl relative">
         {/* Animated flow line connecting the cards */}
         <div className="hidden lg:block absolute top-[44px] left-[10%] w-[80%] h-1 bg-primary/10 rounded-full overflow-hidden z-0">
           <div className="flow-line w-full h-full bg-primary origin-left scale-x-0 rounded-full"></div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative z-10">
           {FEATURES.map(({ icon: Icon, t: tk, d }, i) => (
             <div
@@ -222,9 +268,13 @@ function Features() {
               <div className="absolute inset-0 bg-primary/5 translate-y-full group-hover:translate-y-0 transition-transform duration-500 rounded-2xl"></div>
               <div className="shrink-0 w-20 h-20 rounded-full bg-white border-4 border-primary-soft shadow-md flex items-center justify-center mb-5 relative z-10 group-hover:scale-110 transition-transform">
                 <Icon className="w-8 h-8 text-primary" strokeWidth={1.5} />
-                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-accent-yellow text-primary flex items-center justify-center font-extrabold text-sm shadow-sm">{i+1}</div>
+                <div className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-accent-yellow text-primary flex items-center justify-center font-extrabold text-sm shadow-sm">
+                  {i + 1}
+                </div>
               </div>
-              <h3 className="font-display font-bold text-card-foreground text-xl relative z-10">{t(tk)}</h3>
+              <h3 className="font-display font-bold text-card-foreground text-xl relative z-10">
+                {t(tk)}
+              </h3>
               <p className="text-sm text-muted-foreground mt-3 relative z-10">{t(d)}</p>
             </div>
           ))}
@@ -241,36 +291,43 @@ function Catalog() {
   return (
     <section className="mx-4 mt-16">
       <div className="mx-auto max-w-7xl">
-        <h2 className="text-center text-3xl font-extrabold text-primary-deep lg:text-4xl">
-          {t("nav.products")}
-        </h2>
+        <div className="flex items-end justify-between flex-wrap gap-4 px-2 sm:px-4">
+          <h2 className="text-3xl font-extrabold text-primary-deep lg:text-4xl">
+            {t("nav.products")}
+          </h2>
+          <Link
+            to="/mahsulotlar"
+            className="text-primary font-semibold text-sm inline-flex items-center gap-1 hover:gap-2 transition-all"
+          >
+            {t("catalog.all")} <ArrowRight className="w-4 h-4" />
+          </Link>
+        </div>
 
-        <div className="group relative mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_4%,#000_96%,transparent)]">
+        <div className="group relative mt-8 overflow-hidden [mask-image:linear-gradient(to_right,transparent,#000_4%,#000_96%,transparent)] py-4">
           <div
-            className="flex w-max gap-4 animate-marquee py-1"
-            style={{ animationDuration: "28s" }}
+            className="flex w-max gap-5 animate-marquee"
+            style={{ animationDuration: "35s" }}
           >
             {track.map((p, i) => (
-              <div key={`${p.name}-${p.size}-${i}`} className="w-[280px] shrink-0 sm:w-[320px]">
+              <div key={`${p.name}-${p.size}-${i}`} className="w-[220px] shrink-0 sm:w-[260px]">
                 <Link
                   to="/mahsulotlar"
                   hash={() => getProductAnchor(p)}
                   aria-label={`${formatProductName(p.name)} ${formatProductSize(p.size)}`}
-                  className="group/card mx-2 block overflow-hidden rounded-[24px] bg-[#f3f4f6] transition hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
+                  className="group/card mx-2 block overflow-hidden rounded-2xl bg-white transition-all duration-300 hover:-translate-y-2 hover:shadow-xl border border-primary-deep/5 hover:border-primary/30"
                 >
-                  <div className="flex h-[420px] items-end justify-center px-[20px] pb-[16px] pt-[30px]">
-                    <div
-                      className="flex items-end"
-                      style={p.imgYOffset ? { transform: `translateY(${p.imgYOffset}px)` } : undefined}
-                    >
-                      <img
-                        src={p.img}
-                        alt={p.name}
-                        loading="lazy"
-                        style={{ height: p.imgH ? `${p.imgH}px` : undefined }}
-                        className={`block w-auto max-w-full origin-bottom object-contain object-bottom transition-transform duration-300 group-hover/card:scale-[1.03] ${p.imgClass || ""}`}
-                      />
-                    </div>
+                  <div className="flex h-[280px] items-center justify-center px-4 py-4 relative">
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/[0.02] opacity-0 group-hover/card:opacity-100 transition-opacity duration-300" />
+                    <img
+                      src={p.img}
+                      alt={p.name}
+                      loading="lazy"
+                      style={{
+                        maxHeight: "220px",
+                        height: "auto",
+                      }}
+                      className={`relative z-10 block w-auto max-w-full object-contain transition-transform duration-500 group-hover/card:scale-110 drop-shadow-sm group-hover/card:drop-shadow-md ${p.imgClass || ""}`}
+                    />
                   </div>
                   <span className="sr-only">
                     {formatProductName(p.name)} {formatProductSize(p.size)}
@@ -281,12 +338,7 @@ function Catalog() {
           </div>
         </div>
 
-        <Link
-          to="/mahsulotlar"
-          className="mx-auto mt-6 inline-flex w-full items-center justify-center gap-1 text-sm font-semibold text-primary transition-all hover:gap-2"
-        >
-          {t("catalog.all")} <ArrowRight className="w-4 h-4" />
-        </Link>
+
       </div>
     </section>
   );
@@ -342,8 +394,7 @@ function Blog() {
 
 function Index() {
   return (
-    <div className="min-h-screen bg-background pt-4 pb-0">
-      <SiteHeader />
+    <div className="min-h-screen bg-background pb-0">
       <main>
         <Hero />
         <Features />

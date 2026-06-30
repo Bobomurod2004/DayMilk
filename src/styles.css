@@ -168,7 +168,7 @@
 }
 
 @utility wave-divider {
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 80' preserveAspectRatio='none'><path d='M0,40 C240,80 480,0 720,40 C960,80 1200,0 1440,40 L1440,80 L0,80 Z' fill='%232b5fc8'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 120' preserveAspectRatio='none'><path d='M0,60 Q360,20 720,60 T1440,60 L1440,120 L0,120 Z' fill='oklch(0.46 0.22 262)'/><path d='M0,80 Q360,40 720,80 T1440,80 L1440,120 L0,120 Z' fill='oklch(0.42 0.20 262)' opacity='0.7'/></svg>");
   background-size: 100% 100%;
 }
 
